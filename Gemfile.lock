@@ -1,0 +1,126 @@
+PATH
+  remote: .
+  specs:
+    sockjs (0.3.4.3)
+      faye-websocket (~> 0.7.1)
+      json
+      rack
+      rack-mount (~> 0.8.3)
+      regin (~> 0.3.8)
+      thin
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    chunky_png (1.2.9)
+    coderay (1.0.7)
+    columnize (0.3.6)
+    compass (0.12.2)
+      chunky_png (~> 1.2)
+      fssm (>= 0.2.7)
+      sass (~> 3.1)
+    corundum (0.3.2)
+      bundler
+      compass (>= 0.12.1)
+      mailfactory (~> 1.4.0)
+      mattock (~> 0.7)
+      nokogiri
+      rdoc
+      rspec (>= 2.0)
+      sass (>= 3.1)
+      simplecov (>= 0.5.4)
+      yard
+    daemons (1.1.9)
+    debugger (1.1.4)
+      columnize (>= 0.3.1)
+      debugger-linecache (~> 1.1.1)
+      debugger-ruby_core_source (~> 1.1.3)
+    debugger-linecache (1.1.2)
+      debugger-ruby_core_source (>= 1.1.1)
+    debugger-ruby_core_source (1.1.3)
+    diff-lcs (1.2.5)
+    docile (1.1.1)
+    eventmachine (1.0.3)
+    faye-websocket (0.7.1)
+      eventmachine (>= 0.12.0)
+      websocket-driver (>= 0.3.1)
+    fssm (0.2.10)
+    fuubar (1.0.0)
+      rspec (~> 2.0)
+      rspec-instafail (~> 0.2.0)
+      ruby-progressbar (~> 0.0.10)
+    json (1.8.1)
+    macaddr (1.6.0)
+      systemu (~> 2.2.0)
+    mailfactory (1.4.0)
+      mime-types (>= 1.13.1)
+    mattock (0.7.0)
+      rake (~> 10.0)
+      tilt (> 0)
+      valise (>= 0.9.1)
+    method_source (0.7.1)
+    mime-types (2.0)
+    mini_portile (0.5.2)
+    multi_json (1.8.2)
+    nokogiri (1.6.0)
+      mini_portile (~> 0.5.0)
+    pry (0.9.9.6)
+      coderay (~> 1.0.5)
+      method_source (~> 0.7.1)
+      slop (>= 2.4.4, < 3)
+    pry-debugger (0.2.0)
+      debugger (~> 1.1.3)
+      pry (~> 0.9.9)
+    rack (1.4.1)
+    rack-mount (0.8.3)
+      rack (>= 1.0.0)
+    rack-test (0.6.1)
+      rack (>= 1.0)
+    rake (10.1.0)
+    rdoc (4.0.1)
+      json (~> 1.4)
+    regin (0.3.8)
+    rspec (2.14.1)
+      rspec-core (~> 2.14.0)
+      rspec-expectations (~> 2.14.0)
+      rspec-mocks (~> 2.14.0)
+    rspec-core (2.14.7)
+    rspec-expectations (2.14.4)
+      diff-lcs (>= 1.1.3, < 2.0)
+    rspec-instafail (0.2.4)
+    rspec-mocks (2.14.4)
+    ruby-progressbar (0.0.10)
+    sass (3.2.12)
+    simplecov (0.8.2)
+      docile (~> 1.1.0)
+      multi_json
+      simplecov-html (~> 0.8.0)
+    simplecov-html (0.8.0)
+    slop (2.4.4)
+    systemu (2.2.0)
+    thin (1.4.1)
+      daemons (>= 1.0.9)
+      eventmachine (>= 0.12.6)
+      rack (>= 1.0.0)
+    tilt (2.0.0)
+    uuid (2.3.5)
+      macaddr (~> 1.0)
+    valise (1.0.0)
+    websocket-driver (0.3.1)
+    yard (0.8.7.3)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  corundum
+  faye-websocket
+  fuubar
+  pry
+  pry-debugger
+  rack
+  rack-test
+  rspec
+  sockjs!
+  thin
+  uuid

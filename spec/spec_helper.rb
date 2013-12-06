@@ -17,11 +17,11 @@ module TransportSpecMacros
     describe SockJS::Transport do
       describe "transports[#{path}]" do
         let :route_set do
-          mock("Route Set")
+          double("Route Set")
         end
 
         let :connection do
-          mock("Connection")
+          double("Connection")
         end
 
         let :options do
