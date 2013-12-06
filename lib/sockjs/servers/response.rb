@@ -109,6 +109,7 @@ module SockJS
     def set_access_control(origin)
       self.set_header("Access-Control-Allow-Origin", origin)
       self.set_header("Access-Control-Allow-Credentials", "true")
+      self.set_header("Access-Control-Allow-Headers", "Content-Type Origin Accept X-Requested-With X-CSRF-Token If-Modified-Since If-None-Match Auth-User-Token Authorization Connection Cookie User-Agent")
     end
 
     def set_cache_control

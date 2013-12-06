@@ -109,6 +109,7 @@ module SockJS
     end
 
     def origin
+      return "*" if self.headers["origin"] == "null"
       self.headers["origin"] || "*"
     end
 

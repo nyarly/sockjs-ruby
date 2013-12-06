@@ -47,7 +47,7 @@ module Rack
   class SockJS
     SERVER_SESSION_REGEXP = %r{/([^/]*)/([^/]*)}
     DEFAULT_OPTIONS = {
-      :sockjs_url => "http://cdn.sockjs.org/sockjs-#{::SockJS::PROTOCOL_VERSION}.min.js"
+      :sockjs_url => "http://cdn.sockjs.org/sockjs-#{::SockJS::PROTOCOL_VERSION_STRING}.min.js"
     }
 
 

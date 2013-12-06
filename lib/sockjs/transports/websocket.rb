@@ -85,17 +85,22 @@ module SockJS
 
       def process_session(session, web_socket)
         #XXX Facade around websocket?
-
-        web_socket.onopen = lambda do |event|
+        @session = session
+        @active  = nil
+        web_socket.on :open do |event|
           begin
+            SockJS.debug "Attaching consumer"
+            @active = true
             session.attach_consumer(web_socket, self)
           rescue Object => ex
             SockJS::debug "Error opening (#{event.inspect[0..40]}) websocket: #{ex.inspect}"
           end
         end
 
-        web_socket.onmessage = lambda do |event|
+        web_socket.on :message do |event|
           begin
+            session.activate unless @active
+            @active = true
             session.receive_message(extract_message(event))
           rescue Object => ex
             SockJS::debug "Error receiving message on websocket (#{event.inspect[0..40]}): #{ex.inspect}"
@@ -103,11 +108,11 @@ module SockJS
           end
         end
 
-        web_socket.onclose = lambda do |event|
+        web_socket.on :close do |event|
           begin
-            session.close
+            session.close(1000, "Session finished")
           rescue Object => ex
-            SockJS::debug "Error closing websocket (#{event.inspect[0..40]}): #{ex.inspect}"
+            SockJS::debug "Error closing websocket (#{event.inspect[0..40]}): #{ex.inspect} \n#{ex.message} \n#{ex.backtrace.join("\n")}"
           end
         end
       end
@@ -122,6 +127,7 @@ module SockJS
       end
 
       def finish_response(web_socket)
+        SockJS.debug "Finishing response"
         web_socket.close
       end
 
@@ -129,10 +135,37 @@ module SockJS
         SockJS.debug "Received message event: #{event.data.inspect}"
         event.data
       end
+
+      def heartbeat_frame(web_socket)
+        @pong = true if @pong.nil?
+
+        #no replay from last connection - susspend session
+        if !@pong
+          @session.suspend if @session && @active
+          @active = false
+        end
+        @pong = false
+        web_socket.ping("ping") do
+          SockJS.debug "pong"
+          @pong = true
+          @session.activate unless @active
+          @active = true
+        end
+        super
+      end
     end
 
     class RawWebSocket < WebSocket
       register 'GET', 'websocket'
+
+      def handle_request(request)
+        ver = request.env["sec-websocket-version"] || ""
+        unless ['8', '13'].include?(ver)
+          raise HttpError.new(400, 'Only supported WebSocket protocol is RFC 6455.')
+        end
+
+        super
+      end
 
       def self.routing_prefix
         "/" + self.prefix

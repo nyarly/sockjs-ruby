@@ -15,7 +15,12 @@ module SockJS
 
       #Close the *response* not the *session*
       def disconnect
-        @response.finish
+        #WEBSCOKET shouldn't have limit of data - faye will send closing frame after 1GB
+        if @transport.kind_of?(SockJS::Transports::WebSocket)
+          @total_sent_length = 0
+          return
+        end
+        @response.finish if @response.respond_to?(:finish)
       end
 
       def heartbeat
@@ -55,7 +60,9 @@ module SockJS
 
       def attach_consumer(response, transport)
         @consumer = Consumer.new(response, transport)
+        activate
         transition_to :attached
+        after_consumer_attached
       end
 
       def detach_consumer
@@ -67,10 +74,19 @@ module SockJS
         @outbox += messages
       end
 
+      def suspend
+        @suspend = true
+      end
+
+      def activate
+        @suspend = false
+      end
+
       def close(status = nil, message = nil)
         @close_status = status
         @close_message = message
         transition_to(:closed)
+        closed
       end
     end
 
@@ -91,6 +107,7 @@ module SockJS
 
       def detach_consumer
         transition_to :detached
+        after_consumer_detached
       end
 
       def send(*messages)
@@ -102,12 +119,26 @@ module SockJS
         @consumer.heartbeat
       end
 
-      def close(status = nil, message = nil)
+      def suspend
+        @suspend = true
+        SockJS.debug "Session suspended - it is on hold"
+        suspended
+      end
+
+      def activate
+        activated
+        SockJS.debug "Session activated - is not on hold anymore!"
+        @suspend = false
+      end
+
+
+      def close(status = 1002, message = "Connection interrupted")
         @close_status = status
         @close_message = message
         @consumer.closing(@close_status, @close_message)
         @consumer = nil
         transition_to(:closed)
+        closed
       end
     end
 
@@ -119,8 +150,20 @@ module SockJS
         set_close_timer
       end
 
+      def suspend
+        @suspend = true
+      end
+
+      def activate
+        @suspend = false
+      end
+
       def attach_consumer(response, transport)
         transport.closing_frame(response, @close_status, @close_message)
+      end
+
+      def close(status, message)
+        #can be called from faye onclose hook
       end
     end
 
@@ -146,6 +189,11 @@ module SockJS
 
       set_disconnect_timer
     end
+
+    def suspended?
+      !!@suspend
+    end
+
 
     def check_content_length
       if @consumer.total_sent_length >= max_permitted_content_length
@@ -188,6 +236,20 @@ module SockJS
     def after_app_run
     end
 
+    def closed
+    end
+
+    def activated
+    end
+
+    def suspended
+    end
+
+    def after_consumer_attached
+    end
+
+    def after_consumer_detached
+    end
 
     attr_accessor :disconnect_delay, :interval
     attr_reader :transport, :response, :outbox, :closing_frame, :data
@@ -258,9 +320,9 @@ module SockJS
         begin
           @consumer.check_alive
         rescue Exception => error
-          puts "==> "
+          puts "==> #{error.message}"
           SockJS.debug error
-          puts "==> "
+          puts "==> #{error.message}"
           on_close
           @alive_checker.cancel
         end

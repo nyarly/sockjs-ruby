@@ -41,6 +41,10 @@ module SockJS
           raise SockJS::HttpError.new(500, '"callback" parameter required')
         end
 
+        if !!/[^a-zA-Z0-9\-_.]/.match(response.request.callback)
+          raise SockJS::HttpError.new(500, 'invalid "callback" parameter')
+        end
+
         super
       end
 

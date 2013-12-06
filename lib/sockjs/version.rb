@@ -2,12 +2,12 @@
 
 module SockJS
   # SockJS protocol version.
-  PROTOCOL_VERSION = [0, 2, 1]
+  PROTOCOL_VERSION = [0, 3, 4]
 
   PROTOCOL_VERSION_STRING = PROTOCOL_VERSION.join(".")
 
   # Patch version of the gem.
-  PATCH_VERSION = []
+  PATCH_VERSION = [3]
 
   GEM_VERSION = (PROTOCOL_VERSION + PATCH_VERSION).join(".")
 end

@@ -127,7 +127,10 @@ module SockJS
       "#{payload}\n"
     end
 
+    attr_reader :remote_addr, :http_origin
     def call(env)
+      @remote_addr = env["REMOTE_ADDR"]
+      @http_origin = env["HTTP_ORIGIN"]
       SockJS.debug "Request for #{self.class}: #{env["REQUEST_METHOD"]}/#{env["PATH_INFO"]}"
       request = ::SockJS::Request.new(env)
       EM.next_tick do

@@ -82,7 +82,7 @@ module SockJS
 
 
     class ClosingFrame < Frame
-      def initialize(status, message)
+      def initialize(status=1000, message="Normal closing")
         validate Integer, status
         validate String, message
 
