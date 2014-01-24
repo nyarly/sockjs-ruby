@@ -74,6 +74,7 @@ module SockJS
 
         web_socket = Faye::WebSocket.new(request.env)
 
+        #XXX Better to subclass F::WS with the mixin than to extend here
         web_socket.extend(WSDebuggingMixin)
 
         return web_socket

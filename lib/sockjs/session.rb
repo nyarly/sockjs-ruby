@@ -15,7 +15,8 @@ module SockJS
 
       #Close the *response* not the *session*
       def disconnect
-        #WEBSCOKET shouldn't have limit of data - faye will send closing frame after 1GB
+        #WEBSOCKET shouldn't have limit of data - faye will send closing frame
+        #after 1GB
         if @transport.kind_of?(SockJS::Transports::WebSocket)
           @total_sent_length = 0
           return

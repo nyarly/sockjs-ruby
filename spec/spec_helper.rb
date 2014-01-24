@@ -105,7 +105,7 @@ class SockJS::Response
 end
 
 RSpec.configure do |config|
-  config.backtrace_clean_patterns.delete(/gems/)
+  config.backtrace_exclusion_patterns.delete(/gems/)
   config.extend(TransportSpecMacros)
   config.before do
     class SockJS::Transport
