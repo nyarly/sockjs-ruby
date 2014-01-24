@@ -61,8 +61,10 @@ module SockJS
 
       def attach_consumer(response, transport)
         @consumer = Consumer.new(response, transport)
+      #XXX
         activate
         transition_to :attached
+      #XXX
         after_consumer_attached
       end
 
@@ -75,10 +77,12 @@ module SockJS
         @outbox += messages
       end
 
+      #XXX
       def suspend
         @suspend = true
       end
 
+      #XXX
       def activate
         @suspend = false
       end
@@ -120,12 +124,14 @@ module SockJS
         @consumer.heartbeat
       end
 
+      #XXX
       def suspend
         @suspend = true
         SockJS.debug "Session suspended - it is on hold"
         suspended
       end
 
+      #XXX
       def activate
         activated
         SockJS.debug "Session activated - is not on hold anymore!"
@@ -151,10 +157,12 @@ module SockJS
         set_close_timer
       end
 
+      #XXX
       def suspend
         @suspend = true
       end
 
+      #XXX
       def activate
         @suspend = false
       end
@@ -191,6 +199,7 @@ module SockJS
       set_disconnect_timer
     end
 
+      #XXX
     def suspended?
       !!@suspend
     end
@@ -240,9 +249,11 @@ module SockJS
     def closed
     end
 
+      #XXX
     def activated
     end
 
+      #XXX
     def suspended
     end
 
