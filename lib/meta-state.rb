@@ -1,5 +1,3 @@
-
-
 module MetaState
   class Error < ::StandardError; end
   class WrongStateError < Error; end
@@ -71,9 +69,9 @@ module MetaState
         @void_state_module = Module.new do
           methods.each do |method|
             if NON_MESSAGES.include?(method)
-              define_method(method){|*args| }
+              define_method(method){}
             else
-              define_method(method) do |*args|
+              define_method(method) do
                 raise WrongStateError, "Message #{method} received in state #{current_state}"
               end
             end

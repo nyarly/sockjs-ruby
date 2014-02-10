@@ -86,6 +86,10 @@ module SockJS
         @close_message = message
         transition_to(:closed)
       end
+
+      def set_heartbeat_timer
+        _set_heartbeat_timer
+      end
     end
 
     state :Attached do
@@ -131,6 +135,10 @@ module SockJS
         @consumer = nil
         transition_to(:closed)
       end
+
+      def set_heartbeat_timer
+        _set_heartbeat_timer
+      end
     end
 
     state :Suspended do
@@ -175,6 +183,10 @@ module SockJS
         @consumer = nil
         transition_to(:closed)
       end
+
+      def set_heartbeat_timer
+        _set_heartbeat_timer
+      end
     end
 
     state :Closed do
@@ -200,6 +212,10 @@ module SockJS
 
       def close(status=nil, message=nil)
         #can be called from faye onclose hook
+      end
+
+      def set_heartbeat_timer
+        SockJS.debug "trying to setup heartbeat on closed session!"
       end
     end
 
@@ -227,12 +243,6 @@ module SockJS
       set_disconnect_timer
     end
 
-    def suspended?
-      #XXX Conditionals based on state...
-      current_state == SockJS::Session::Suspended
-    end
-
-
     def check_content_length
       if @consumer.total_sent_length >= max_permitted_content_length
         SockJS.debug "Maximum content length exceeded, closing the connection."
@@ -246,7 +256,7 @@ module SockJS
 
     def run_user_app
       unless @received_messages.empty?
-        reset_heartbeat_timer #XXX Only one point which can set hearbeat while state is closed
+        reset_heartbeat_timer #XXX Only one point which can set heartbeat while state is closed
 
         SockJS.debug "Executing user's SockJS app"
 
@@ -417,12 +427,7 @@ module SockJS
       set_alive_timer
     end
 
-    def set_heartbeat_timer
-      #XXX Conditionals based on state...
-      if current_state == SockJS::Session::Closed
-        SockJS.debug "trying to setup heartbeat on closed session!"
-        return
-      end
+    def _set_heartbeat_timer
       clear_timer(:disconnect)
       clear_timer(:alive)
       set_timer(:heartbeat, EM::PeriodicTimer, 25) do
@@ -432,12 +437,7 @@ module SockJS
 
     def reset_heartbeat_timer
       clear_timer(:heartbeat)
-      #XXX Conditionals based on state...
-      if current_state == SockJS::Session::Closed
-        SockJS.debug "trying to setup heartbeat on closed session!"
-      else
-        set_heartbeat_timer
-      end
+      set_heartbeat_timer
     end
 
     def set_disconnect_timer
