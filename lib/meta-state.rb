@@ -71,9 +71,9 @@ module MetaState
         @void_state_module = Module.new do
           methods.each do |method|
             if NON_MESSAGES.include?(method)
-              define_method(method){}
+              define_method(method){|*args| }
             else
-              define_method(method) do
+              define_method(method) do |*args|
                 raise WrongStateError, "Message #{method} received in state #{current_state}"
               end
             end

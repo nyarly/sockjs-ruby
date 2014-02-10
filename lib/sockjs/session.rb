@@ -61,10 +61,8 @@ module SockJS
 
       def attach_consumer(response, transport)
         @consumer = Consumer.new(response, transport)
-      #XXX
         activate
         transition_to :attached
-      #XXX
         after_consumer_attached
       end
 
@@ -73,25 +71,20 @@ module SockJS
         close(1002,"Connection interrupted")
       end
 
+      def activate
+      end
+
+      def suspended
+      end
+
       def send(*messages)
         @outbox += messages
-      end
-
-      #XXX
-      def suspend
-        @suspend = true
-      end
-
-      #XXX
-      def activate
-        @suspend = false
       end
 
       def close(status = nil, message = nil)
         @close_status = status
         @close_message = message
         transition_to(:closed)
-        closed
       end
     end
 
@@ -124,18 +117,54 @@ module SockJS
         @consumer.heartbeat
       end
 
-      #XXX
       def suspend
-        @suspend = true
+        transition_to :suspended
+      end
+
+      def activate
+      end
+
+      def close(status = 1002, message = "Connection interrupted")
+        @close_status = status
+        @close_message = message
+        @consumer.closing(@close_status, @close_message)
+        @consumer = nil
+        transition_to(:closed)
+      end
+    end
+
+    state :Suspended do
+      def on_enter
         SockJS.debug "Session suspended - it is on hold"
         suspended
       end
 
-      #XXX
+      def attach_consumer(response, transport)
+        SockJS.debug "Session#attach_consumer: another connection still open"
+        transport.closing_frame(response, 2010, "Another connection still open")
+        close(1002, "Connection interrupted")
+      end
+
+      def detach_consumer
+        transition_to :detached
+        after_consumer_detached
+      end
+
+      def send(*messages)
+        @outbox += messages
+      end
+
+      def send_heartbeat
+        @consumer.heartbeat
+      end
+
+      def suspend
+      end
+
       def activate
-        activated
         SockJS.debug "Session activated - is not on hold anymore!"
-        @suspend = false
+        transition_to :attached
+        activated
       end
 
 
@@ -145,7 +174,6 @@ module SockJS
         @consumer.closing(@close_status, @close_message)
         @consumer = nil
         transition_to(:closed)
-        closed
       end
     end
 
@@ -155,23 +183,22 @@ module SockJS
         @close_message ||= "Go away!"
         clear_all_timers
         set_close_timer
+        closed
       end
 
-      #XXX
       def suspend
-        @suspend = true
+        SockJS.debug "Session#suspend: connection closed!"
       end
 
-      #XXX
       def activate
-        @suspend = false
+        SockJS.debug "Session#activate: connection closed!"
       end
 
       def attach_consumer(response, transport)
         transport.closing_frame(response, @close_status, @close_message)
       end
 
-      def close(status, message)
+      def close(status=nil, message=nil)
         #can be called from faye onclose hook
       end
     end
@@ -184,6 +211,7 @@ module SockJS
     # of json-encoded messages, depending on transport.
     def receive_message(data)
       clear_timer(:disconnect)
+      activate
 
       SockJS.debug "Session receiving message: #{data.inspect}"
       messages = parse_json(data)
@@ -199,9 +227,9 @@ module SockJS
       set_disconnect_timer
     end
 
-      #XXX
     def suspended?
-      !!@suspend
+      #XXX Conditionals based on state...
+      current_state == SockJS::Session::Suspended
     end
 
 
@@ -209,6 +237,7 @@ module SockJS
       if @consumer.total_sent_length >= max_permitted_content_length
         SockJS.debug "Maximum content length exceeded, closing the connection."
 
+        #shouldn't be restarting connection?
         @consumer.disconnect
       else
         SockJS.debug "Permitted content length: #{@consumer.total_sent_length} of #{max_permitted_content_length}"
@@ -217,7 +246,7 @@ module SockJS
 
     def run_user_app
       unless @received_messages.empty?
-        reset_heartbeat_timer
+        reset_heartbeat_timer #XXX Only one point which can set hearbeat while state is closed
 
         SockJS.debug "Executing user's SockJS app"
 
@@ -249,11 +278,9 @@ module SockJS
     def closed
     end
 
-      #XXX
     def activated
     end
 
-      #XXX
     def suspended
     end
 
@@ -324,9 +351,9 @@ module SockJS
     def disconnect_expired
       SockJS.debug "#{@disconnect_delay} has passed, firing @disconnect_timer"
       close
+      #XXX Shouldn't destroy the session?
     end
 
-    #XXX Remove?  What's this for?
     def check_response_alive
       if @consumer
         begin
@@ -391,6 +418,11 @@ module SockJS
     end
 
     def set_heartbeat_timer
+      #XXX Conditionals based on state...
+      if current_state == SockJS::Session::Closed
+        SockJS.debug "trying to setup heartbeat on closed session!"
+        return
+      end
       clear_timer(:disconnect)
       clear_timer(:alive)
       set_timer(:heartbeat, EM::PeriodicTimer, 25) do
@@ -400,7 +432,12 @@ module SockJS
 
     def reset_heartbeat_timer
       clear_timer(:heartbeat)
-      set_heartbeat_timer
+      #XXX Conditionals based on state...
+      if current_state == SockJS::Session::Closed
+        SockJS.debug "trying to setup heartbeat on closed session!"
+      else
+        set_heartbeat_timer
+      end
     end
 
     def set_disconnect_timer
