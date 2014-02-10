@@ -29,3 +29,9 @@ spaghettified. Sessions (and a couple of the protocol handlers) are built on an
 State Machine pattern, and code that doesn't align with that will not get
 merged. Basically, if you're tempted to use a conditional based on the state of
 a connection, *don't.*
+
+# BOUNDARIES
+
+Do not:
+
+* edit the gemspec or the version.rb
