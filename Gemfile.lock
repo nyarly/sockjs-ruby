@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    sockjs (0.3.4.3)
+    sockjs (0.3.4.4)
       faye-websocket (~> 0.7.1)
       json
       rack
