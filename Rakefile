@@ -7,7 +7,7 @@ module Corundum
   core = Core.new
 
   core.in_namespace do
-    sanity = GemspecSanity.new(core)
+    GemspecFiles.new(core)
     QuestionableContent.new(core) do |dbg|
       dbg.words = %w{debug! debugger}
     end
