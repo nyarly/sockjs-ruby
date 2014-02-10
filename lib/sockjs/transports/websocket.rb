@@ -1,5 +1,12 @@
 # encoding: utf-8
 
+=begin
+#XXX
+#kacperk added this:
+def activate
+end# encoding: utf-8
+=end
+
 require "forwardable"
 require "sockjs/faye"
 require "sockjs/transport"
@@ -61,8 +68,10 @@ module SockJS
         if not @options[:websocket]
           raise HttpError.new(404, "WebSockets Are Disabled")
         elsif request.env["HTTP_UPGRADE"].to_s.downcase != "websocket"
+          SockJS.debug("Wrong headers! HTTP_UPGRADE = #{request.env["HTTP_UPGRADE"].to_s}")
           raise HttpError.new(400, 'Can "Upgrade" only to "WebSocket".')
         elsif not ["Upgrade", "keep-alive, Upgrade"].include?(request.env["HTTP_CONNECTION"])
+          SockJS.debug("Wrong headers! HTTP_CONNECTION = #{request.env["HTTP_CONNECTION"].to_s}")
           raise HttpError.new(400, '"Connection" must be "Upgrade".')
         end
 
@@ -74,7 +83,6 @@ module SockJS
 
         web_socket = Faye::WebSocket.new(request.env)
 
-        #XXX Better to subclass F::WS with the mixin than to extend here
         web_socket.extend(WSDebuggingMixin)
 
         return web_socket
@@ -84,38 +92,12 @@ module SockJS
         response = response_class.new(request)
       end
 
-      #Regarding the @active variable, per @kacperk:
-      #Sending the heartbeat response without a request will do nothing. Basicly mechanism which is implemented here work like this:
-      #
-      #there was response from previous heartbeat?
-      #YES - send a new heartbeat
-      #NO - suspend session (session is idle, but not closed), send new heartbeat
-      #
-      #heartbeat response received from client set that it was received set
-      #session active if session was suspended
-      #
-      #So the heartbeat response will never close the whole transport
-      #
-      #I was trying to do the mechanism which is added to new faye on client
-      #side - you have event transport:down and transport:up Which are telling
-      #that for a moment there is no connection, but websocket session wasn't
-      #closed (for example when you lost internet connection for a moment).
-      #
-      #I hope I explained it enough.
-      #
-      #@nyarly: I think what needs to happen here is that the state of the
-      #session should determine how the heartbeat handling happens: @active
-      #should be completely elided in favor of the existence/state of a session
-
       def process_session(session, web_socket)
         #XXX Facade around websocket?
         @session = session
-        @active  = nil
         web_socket.on :open do |event|
           begin
             SockJS.debug "Attaching consumer"
-            #XXX
-            @active = true
             session.attach_consumer(web_socket, self)
           rescue Object => ex
             SockJS::debug "Error opening (#{event.inspect[0..40]}) websocket: #{ex.inspect}"
@@ -124,8 +106,6 @@ module SockJS
 
         web_socket.on :message do |event|
           begin
-            session.activate unless @active
-            @active = true
             session.receive_message(extract_message(event))
           rescue Object => ex
             SockJS::debug "Error receiving message on websocket (#{event.inspect[0..40]}): #{ex.inspect}"
@@ -166,15 +146,13 @@ module SockJS
 
         #no replay from last connection - susspend session
         if !@pong
-          @session.suspend if @session && @active
-          @active = false
+          @session.suspend if @session
         end
         @pong = false
         web_socket.ping("ping") do
           SockJS.debug "pong"
           @pong = true
-          @session.activate unless @active
-          @active = true
+          @session.activate
         end
         super
       end

@@ -1,5 +1,3 @@
-
-
 module MetaState
   class Error < ::StandardError; end
   class WrongStateError < Error; end
