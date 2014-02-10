@@ -229,6 +229,10 @@ module SockJS
       current_state == SockJS::Session::Suspended
     end
 
+    def closed?
+      current_state == SockJS::Session::Closed
+    end
+
     def check_content_length
       if @consumer.total_sent_length >= max_permitted_content_length
         SockJS.debug "Maximum content length exceeded, closing the connection."
