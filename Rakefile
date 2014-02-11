@@ -57,35 +57,89 @@ task :unpack_tests do
   puts tests.to_yaml
 end
 
-desc "Run the protocol test server"
-task :protocol_test, [:port] do |task, args|
-  require "thin"
-  require 'em/pure_ruby'
-  #require "eventmachine"
-  require 'sockjs/examples/protocol_conformance_test'
+desc "Run the protocol tests from https://github.com/sockjs/sockjs-protocol"
+task :protocol_test, [:port] => 'protocol_test:run'
 
-  $DEBUG = true
+namespace :protocol_test do
+  task :run, [:port] => [:collect_args, :client] do |task, args|
+  end
 
-  PORT = args[:port] || 8081
+  task :collect_args, [:port] do |task, args|
+    $TEST_PORT = (args[:port] || ENV["TEST_PORT"] || 8081)
+  end
 
-  ::Thin::Connection.class_eval do
-    def handle_error(error = $!)
-      log "[#{error.class}] #{error.message}\n  - "
-      log error.backtrace.join("\n  - ")
-      close_connection rescue nil
+  task :check_port do
+    begin
+      test_conn = TCPSocket.new 'localhost', $TEST_PORT
+      fail "Something is still running on localhost:#$TEST_PORT"
+    rescue Errno::ECONNREFUSED
+      #That's what we're hoping for
+    ensure
+      test_conn.close rescue nil
     end
   end
 
-  SockJS.debug!
-  SockJS.debug "Available handlers: #{::SockJS::Endpoint.endpoints.inspect}"
+  task :run_server => :check_port do
+    $server_pid = Process::fork do
+      sh "rake -t protocol_test:server[#$TEST_PORT]"
+    end
 
-  protocol_version = args[:version] || SockJS::PROTOCOL_VERSION
-  options = {sockjs_url: "http://cdn.sockjs.org/sockjs-#{protocol_version}.min.js"}
+    %w{EXIT TERM}.each do |signal|
+      trap(signal) do
+        Process::kill('KILL', $server_pid) rescue nil
+        Process::wait($server_pid)
+      end
+    end
 
-  app = SockJS::Examples::ProtocolConformanceTest.build_app(options)
+    begin_time = Time.now
+    begin
+      test_conn = TCPSocket.new 'localhost', $TEST_PORT
+    rescue Errno::ECONNREFUSED
+      if Time.now - begin_time > 10
+        raise "Couldn't connect to test server in 10 seconds - bailing out"
+      else
+        retry
+      end
+    ensure
+      test_conn.close rescue nil
+    end
+  end
 
-  EM.run do
-    thin = Rack::Handler.get("thin")
-    thin.run(app, Port: PORT)
+  task :client => :run_server do
+    require 'sockjs/version'
+    sh "protocol/venv/bin/python protocol/sockjs-protocol-#{SockJS::PROTOCOL_VERSION_STRING}.py #{ENV["TEST_NAME"]}"
+  end
+
+  desc "Run the protocol test server"
+  task :server, [:port] do |task, args|
+    require "thin"
+    require 'em/pure_ruby'
+    #require "eventmachine"
+    require 'sockjs/examples/protocol_conformance_test'
+
+    $DEBUG = true
+
+    PORT = args[:port] || 8081
+
+    ::Thin::Connection.class_eval do
+      def handle_error(error = $!)
+        log "[#{error.class}] #{error.message}\n  - "
+        log error.backtrace.join("\n  - ")
+        close_connection rescue nil
+      end
+    end
+
+    SockJS.debug!
+    SockJS.debug "Available handlers: #{::SockJS::Endpoint.endpoints.inspect}"
+
+    protocol_version = args[:version] || SockJS::PROTOCOL_VERSION
+    options = {sockjs_url: "http://cdn.sockjs.org/sockjs-#{protocol_version}.min.js"}
+
+    app = SockJS::Examples::ProtocolConformanceTest.build_app(options)
+
+    EM.run do
+      thin = Rack::Handler.get("thin")
+      thin.run(app, Port: PORT)
+    end
   end
 end
