@@ -115,7 +115,7 @@ namespace :protocol_test do
         require 'sockjs/version'
         SockJS::PROTOCOL_VERSION_STRING
       end
-    sh "protocol/venv/bin/python protocol/sockjs-protocol-#{proto_version}.py #{ENV["TEST_NAME"]}" do |ok, res|
+    sh "protocol/venv/bin/python protocol/sockjs-protocol-#{proto_version}.py #{ENV["FOCUSED_TESTS"]}" do |ok, res|
       if not ok
         puts "Protocol test suite returned failures (#{res})"
       end
