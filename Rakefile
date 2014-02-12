@@ -81,12 +81,16 @@ namespace :protocol_test do
 
   task :run_server => :check_port do
     $server_pid = Process::fork do
-      sh "rake -t protocol_test:server[#$TEST_PORT]"
+      Rake::application.invoke_task "protocol_test:server[#$TEST_PORT]"
     end
 
     %w{EXIT TERM}.each do |signal|
       trap(signal) do
-        Process::kill('KILL', $server_pid) rescue nil
+        puts "Killing #$server_pid"
+        sh "ps -lwwwf #$server_pid"
+        Process::kill('TERM', $server_pid)
+        sleep 1
+        Process::kill('TERM', $server_pid)
         Process::wait($server_pid)
       end
     end
@@ -106,8 +110,16 @@ namespace :protocol_test do
   end
 
   task :client => :run_server do
-    require 'sockjs/version'
-    sh "protocol/venv/bin/python protocol/sockjs-protocol-#{SockJS::PROTOCOL_VERSION_STRING}.py #{ENV["TEST_NAME"]}"
+    proto_version = ENV["PROTO_VERSION"] ||
+      begin
+        require 'sockjs/version'
+        SockJS::PROTOCOL_VERSION_STRING
+      end
+    sh "protocol/venv/bin/python protocol/sockjs-protocol-#{proto_version}.py #{ENV["TEST_NAME"]}" do |ok, res|
+      if not ok
+        puts "Protocol test suite returned failures (#{res})"
+      end
+    end
   end
 
   desc "Run the protocol test server"
@@ -119,7 +131,7 @@ namespace :protocol_test do
 
     $DEBUG = true
 
-    PORT = args[:port] || 8081
+    PORT = Integer(args[:port] || 8081)
 
     ::Thin::Connection.class_eval do
       def handle_error(error = $!)
@@ -132,14 +144,16 @@ namespace :protocol_test do
     SockJS.debug!
     SockJS.debug "Available handlers: #{::SockJS::Endpoint.endpoints.inspect}"
 
-    protocol_version = args[:version] || SockJS::PROTOCOL_VERSION
+    protocol_version = args[:version] || SockJS::PROTOCOL_VERSION_STRING
     options = {sockjs_url: "http://cdn.sockjs.org/sockjs-#{protocol_version}.min.js"}
+    puts "\n#{__FILE__}:#{__LINE__} => #{options.inspect}"
 
     app = SockJS::Examples::ProtocolConformanceTest.build_app(options)
 
-    EM.run do
-      thin = Rack::Handler.get("thin")
-      thin.run(app, Port: PORT)
+    begin
+      Thin::Server.start(app, PORT)
+    rescue => ex
+      p ex.message
     end
   end
 end
