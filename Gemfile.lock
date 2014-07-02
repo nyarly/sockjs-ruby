@@ -6,7 +6,6 @@ PATH
       json
       rack
       rack-mount (~> 0.8.3)
-      regin (~> 0.3.8)
       thin
 
 GEM
@@ -62,7 +61,6 @@ GEM
     rake (10.1.0)
     rdoc (4.0.1)
       json (~> 1.4)
-    regin (0.3.8)
     rspec (2.14.1)
       rspec-core (~> 2.14.0)
       rspec-expectations (~> 2.14.0)
