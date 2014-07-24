@@ -342,7 +342,7 @@ module SockJS
       end
 
       JSON.parse("[#{data}]")[0]
-    rescue JSON::ParserError => error
+    rescue JSON::ParserError
       raise SockJS::InvalidJSON.new(500, "Broken JSON encoding.")
     end
 
