@@ -15,7 +15,8 @@ module SockJS
 
       #Close the *response* not the *session*
       def disconnect
-        #WEBSCOKET shouldn't have limit of data - faye will send closing frame after 1GB
+        #WEBSOCKET shouldn't have limit of data - faye will send closing frame
+        #after 1GB
         if @transport.kind_of?(SockJS::Transports::WebSocket)
           @total_sent_length = 0
           return
@@ -85,6 +86,10 @@ module SockJS
         @close_message = message
         transition_to(:closed)
       end
+
+      def set_heartbeat_timer
+        _set_heartbeat_timer
+      end
     end
 
     state :Attached do
@@ -130,6 +135,10 @@ module SockJS
         @consumer = nil
         transition_to(:closed)
       end
+
+      def set_heartbeat_timer
+        _set_heartbeat_timer
+      end
     end
 
     state :Suspended do
@@ -166,12 +175,17 @@ module SockJS
         activated
       end
 
+
       def close(status = 1002, message = "Connection interrupted")
         @close_status = status
         @close_message = message
         @consumer.closing(@close_status, @close_message)
         @consumer = nil
         transition_to(:closed)
+      end
+
+      def set_heartbeat_timer
+        _set_heartbeat_timer
       end
     end
 
@@ -199,6 +213,10 @@ module SockJS
       def close(status=nil, message=nil)
         #can be called from faye onclose hook
       end
+
+      def set_heartbeat_timer
+        SockJS.debug "trying to setup heartbeat on closed session!"
+      end
     end
 
 
@@ -225,17 +243,10 @@ module SockJS
       set_disconnect_timer
     end
 
-    def suspended?
-      current_state == SockJS::Session::Suspended
-    end
-
-    def closed?
-      current_state == SockJS::Session::Closed
-    end
-
     def check_content_length
       if @consumer.total_sent_length >= max_permitted_content_length
         SockJS.debug "Maximum content length exceeded, closing the connection."
+
         #shouldn't be restarting connection?
         @consumer.disconnect
       else
@@ -245,7 +256,7 @@ module SockJS
 
     def run_user_app
       unless @received_messages.empty?
-        reset_heartbeat_timer #XXX Only one point which can set hearbeat while state is closed
+        reset_heartbeat_timer #XXX Only one point which can set heartbeat while state is closed
 
         SockJS.debug "Executing user's SockJS app"
 
@@ -331,7 +342,7 @@ module SockJS
       end
 
       JSON.parse("[#{data}]")[0]
-    rescue JSON::ParserError => error
+    rescue JSON::ParserError
       raise SockJS::InvalidJSON.new(500, "Broken JSON encoding.")
     end
 
@@ -416,11 +427,7 @@ module SockJS
       set_alive_timer
     end
 
-    def set_heartbeat_timer
-      if current_state == SockJS::Session::Closed
-        SockJS.debug "trying to setup heartbeat on closed session!"
-        return
-      end
+    def _set_heartbeat_timer
       clear_timer(:disconnect)
       clear_timer(:alive)
       set_timer(:heartbeat, EM::PeriodicTimer, 25) do
@@ -430,11 +437,7 @@ module SockJS
 
     def reset_heartbeat_timer
       clear_timer(:heartbeat)
-      if current_state == SockJS::Session::Closed
-        SockJS.debug "trying to setup heartbeat on closed session!"
-      else
-        set_heartbeat_timer
-      end
+      set_heartbeat_timer
     end
 
     def set_disconnect_timer

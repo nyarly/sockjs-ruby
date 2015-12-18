@@ -1,5 +1,4 @@
 .rvmrc
-Gemfile.lock
 vendor
 /*.gem
 *.sw?

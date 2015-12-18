@@ -1,16 +1,28 @@
 h1. About
 
 _*Disclaimer:* This library is still work in progress._
+(It is coming together though)
 
-SockJS is WebSocket emulation library. It means that you use the WebSocket API, only instead of @WebSocket@ class you instantiate @SockJS@ class. I highly recommend to read "SockJS: WebSocket emulation":http://www.rabbitmq.com/blog/2011/09/13/sockjs-websocket-emulation on the RabbitMQ blog for more info.
+SockJS is WebSocket emulation library. It means that you use the WebSocket API,
+only instead of @WebSocket@ class you instantiate @SockJS@ class. I highly
+recommend to read "SockJS: WebSocket
+emulation":http://www.rabbitmq.com/blog/2011/09/13/sockjs-websocket-emulation
+on the RabbitMQ blog for more info.
 
 h2. Prerequisites
 
-Even though this library uses Rack interface, *Thin is required* as "it supports asynchronous callback":http://macournoyer.com/blog/2009/06/04/pusher-and-async-with-thin. For Websockets, we use "faye-websocket":http://blog.jcoglan.com/2011/11/28/announcing-faye-websocket-a-standards-compliant-websocket-library gem.
+Even though this library uses Rack interface, *Thin is required* as "it
+supports asynchronous
+callback":http://macournoyer.com/blog/2009/06/04/pusher-and-async-with-thin.
+For Websockets, we use
+"faye-websocket":http://blog.jcoglan.com/2011/11/28/announcing-faye-websocket-a-standards-compliant-websocket-library
+gem.
 
 h2. The Client-Side Part
 
-For the client-side part you have to use JS library "sockjs-client":http://sockjs.github.com/sockjs-client which provides WebSocket-like API. Here's an example:
+For the client-side part you have to use JS library
+"sockjs-client":http://sockjs.github.com/sockjs-client which provides
+WebSocket-like API. Here's an example:
 
 <pre>
 <script src="http://cdn.sockjs.org/sockjs-0.2.1.min.js"></script>
@@ -116,3 +128,8 @@ h1. Links
 * "SockJS: WebSocket emulation":http://www.rabbitmq.com/blog/2011/09/13/sockjs-websocket-emulation
 * "SockJS: web messaging ain't easy":http://www.rabbitmq.com/blog/2011/08/22/sockjs-web-messaging-aint-easy
 * "PubSubHuddle Realtime Web talk":http://www.rabbitmq.com/blog/2011/09/26/pubsubhuddle-realtime-web-talk
+
+h1. Contributors
+
+* Judson Lester ( @nyarly )
+* Kacper Kawecki ( @kacperk )

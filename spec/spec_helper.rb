@@ -17,11 +17,11 @@ module TransportSpecMacros
     describe SockJS::Transport do
       describe "transports[#{path}]" do
         let :route_set do
-          mock("Route Set")
+          double("Route Set")
         end
 
         let :connection do
-          mock("Connection")
+          double("Connection")
         end
 
         let :options do
@@ -105,7 +105,7 @@ class SockJS::Response
 end
 
 RSpec.configure do |config|
-  config.backtrace_clean_patterns.delete(/gems/)
+  config.backtrace_exclusion_patterns.delete(/gems/)
   config.extend(TransportSpecMacros)
   config.before do
     class SockJS::Transport

@@ -1,5 +1,3 @@
-
-
 module MetaState
   class Error < ::StandardError; end
   class WrongStateError < Error; end
@@ -134,6 +132,9 @@ module MetaState
       return true if target_state == current_state
       source_state = current_state
 
+      if target_state == SockJS::Session::Closed
+        debug{ caller }
+      end
       debug{ "Transitioning from #{source_state.inspect} to #{target_state.inspect}" }
 
       on_exit

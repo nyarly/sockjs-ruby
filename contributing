@@ -1,0 +1,37 @@
+# CONTRIBUTING
+
+The SockJS protocol has stablized somewhat, but this project isn't my only
+work, and I'd really appreciate any and all contributions. If you're looking
+for places to get started, check out the Issues list. Heck: additions to Issues
+are a good place to get started.
+
+Along those lines: please feel free to file an Issue before starting work on a
+fork - we're all busy, and I'd hate for you to waste your time on something
+that won't get merged.
+
+# GIT RELATED
+
+Fork, hack, pull-request. Nothing fancy. If contribution explodes I may
+reconsider this policy.
+
+I personally prefer merge over rebase, but I'm not going to reject your
+beautiful lie of a local revision history, if that's what you want to do.
+
+# TESTING
+
+Please do add tests for your changes. I will almost certainly reject PRs
+without decent testing.
+
+# ARCHITECTURE
+
+Because of the nature of the project, it's very easy for the code to get
+spaghettified. Sessions (and a couple of the protocol handlers) are built on an
+State Machine pattern, and code that doesn't align with that will not get
+merged. Basically, if you're tempted to use a conditional based on the state of
+a connection, *don't.*
+
+# BOUNDARIES
+
+Do not:
+
+* edit the gemspec or the version.rb

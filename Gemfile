@@ -1,5 +1,5 @@
 # encoding: utf-8
-source :rubygems
+source "https://rubygems.org"
 
 gem 'corundum'
 gem "thin"
@@ -11,8 +11,6 @@ gemspec
 group(:test) do
   gem 'uuid'
   gem 'rack-test'
-  gem 'pry'
-  gem 'pry-debugger'
   gem "rspec"
   gem 'fuubar'
 end

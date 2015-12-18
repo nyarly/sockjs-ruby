@@ -1,7 +1,11 @@
+# encoding: utf-8
 
-
+=begin
+#XXX
+#kacperk added this:
 def activate
 end# encoding: utf-8
+=end
 
 require "forwardable"
 require "sockjs/faye"
@@ -64,10 +68,10 @@ module SockJS
         if not @options[:websocket]
           raise HttpError.new(404, "WebSockets Are Disabled")
         elsif request.env["HTTP_UPGRADE"].to_s.downcase != "websocket"
-          SockJS.debug("Worng headers! HTTP_UPGRADE = #{request.env["HTTP_UPGRADE"].to_s}")
+          SockJS.debug("Wrong headers! HTTP_UPGRADE = #{request.env["HTTP_UPGRADE"].to_s}")
           raise HttpError.new(400, 'Can "Upgrade" only to "WebSocket".')
         elsif not ["Upgrade", "keep-alive, Upgrade"].include?(request.env["HTTP_CONNECTION"])
-          SockJS.debug("Worng headers! HTTP_CONNECTION = #{request.env["HTTP_CONNECTION"].to_s}")
+          SockJS.debug("Wrong headers! HTTP_CONNECTION = #{request.env["HTTP_CONNECTION"].to_s}")
           raise HttpError.new(400, '"Connection" must be "Upgrade".')
         end
 

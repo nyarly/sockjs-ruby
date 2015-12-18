@@ -24,7 +24,6 @@ Gem::Specification.new do |s|
   s.add_dependency "thin"
   s.add_dependency "json"
   s.add_dependency "faye-websocket", "~> 0.7.1"
-  s.add_dependency "regin", "~> 0.3.8"
   s.add_dependency "rack-mount", "~> 0.8.3"
 
   # Files
