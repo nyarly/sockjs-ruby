@@ -40,7 +40,7 @@ describe SockJS::Transport do
   end
 
   let :session do
-    mock("Session")
+    double("Session")
   end
 
   describe "#format_frame(payload)" do

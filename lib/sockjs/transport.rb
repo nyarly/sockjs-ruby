@@ -127,6 +127,8 @@ module SockJS
       "#{payload}\n"
     end
 
+    #How is this used?
+    #Thread safety?
     attr_reader :remote_addr, :http_origin
     def call(env)
       @remote_addr = env["REMOTE_ADDR"]
