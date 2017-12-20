@@ -70,8 +70,8 @@ module SockJS
         elsif request.env["HTTP_UPGRADE"].to_s.downcase != "websocket"
           SockJS.debug("Wrong headers! HTTP_UPGRADE = #{request.env["HTTP_UPGRADE"].to_s}")
           raise HttpError.new(400, 'Can "Upgrade" only to "WebSocket".')
-        elsif not ["upgrade", "keep-alive, upgrade"].include?(request.env["HTTP_CONNECTION"])
-          SockJS.debug("Wrong headers! HTTP_CONNECTION = #{request.env["HTTP_CONNECTION"].to_s.downcase}")
+        elsif not ["upgrade", "keep-alive, upgrade"].include?(request.env["HTTP_CONNECTION"].to_s.downcase)
+          SockJS.debug("Wrong headers! HTTP_CONNECTION = #{request.env["HTTP_CONNECTION"].to_s}")
           raise HttpError.new(400, '"Connection" must be "Upgrade".')
         end
 
