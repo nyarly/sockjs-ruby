@@ -162,7 +162,7 @@ module SockJS
       register 'GET', 'websocket'
 
       def handle_request(request)
-        ver = request.env['sec-websocket-version'] || ''
+        ver = request.env['sec-websocket-version'] || request.env['HTTP_SEC_WEBSOCKET_VERSION'] || ''
         unless ['8', '13'].include?(ver)
           raise HttpError.new(400, 'Only supported WebSocket protocol is RFC 6455.')
         end
