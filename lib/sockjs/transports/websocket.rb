@@ -75,7 +75,7 @@ module SockJS
           raise HttpError.new(400, '"Connection" must be "Upgrade".')
         end
 
-        super
+        super.rack_response
       end
 
       def build_response(request)
@@ -138,8 +138,10 @@ module SockJS
 
       def extract_message(event)
         SockJS.debug "Received message event: #{event.data.inspect}"
-        event.data
+      cdsfdsafsadfasasdfadfs  event.data
       end
+
+
 
       def heartbeat_frame(web_socket)
         @pong = true if @pong.nil?
