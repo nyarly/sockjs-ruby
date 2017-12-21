@@ -138,7 +138,7 @@ module SockJS
 
       def extract_message(event)
         SockJS.debug "Received message event: #{event.data.inspect}"
-      cdsfdsafsadfasasdfadfs  event.data
+        event.data
       end
 
 
