@@ -1,33 +1,33 @@
 #!/usr/bin/env gem build
 # encoding: utf-8
 
-require "base64"
+require 'base64'
 
-require File.expand_path("../lib/sockjs/version", __FILE__)
+require File.expand_path('../lib/sockjs/version', __FILE__)
 
 Gem::Specification.new do |s|
-  s.name     = "sockjs"
+  s.name     = 'sockjs'
   s.version  = SockJS::GEM_VERSION
-  s.authors  = ["Judson Lester"]
-  s.email    = "nyarly@gmail.com"
-  s.homepage = "https://github.com/nyarly/sockjs-ruby"
-  s.summary  = "Ruby server for SockJS"
+  s.authors  = ['Judson Lester']
+  s.email    = 'nyarly@gmail.com'
+  s.homepage = 'https://github.com/nyarly/sockjs-ruby'
+  s.summary  = 'Ruby server for SockJS'
   s.description = <<-DESC
     SockJS is a WebSocket emulation library. It means that you use the WebSocket API, only instead of WebSocket class you instantiate SockJS class. In absence of WebSocket, some of the fallback transports will be used. This code is compatible with SockJS protocol #{SockJS::PROTOCOL_VERSION_STRING}.
   DESC
 
   # Ruby version
-  s.required_ruby_version = ::Gem::Requirement.new(">= 1.9")
+  s.required_ruby_version = ::Gem::Requirement.new('>= 1.9')
 
   # Dependencies
-  s.add_dependency "rack"
-  s.add_dependency "thin"
-  s.add_dependency "json"
-  s.add_dependency "faye-websocket", "~> 0.7.1"
-  s.add_dependency "rack-mount", "~> 0.8.3"
+  s.add_dependency 'rack'
+  s.add_dependency 'thin'
+  s.add_dependency 'json'
+  s.add_dependency 'faye-websocket', '~> 0.10.7'
+  s.add_dependency 'rack-mount', '~> 0.8.3'
 
   # Files
-  s.files = %w{
+  s.files = %w[
     LICENCE
     README.textile
     lib/meta-state.rb
@@ -68,11 +68,11 @@ Gem::Specification.new do |s|
     spec/sockjs_spec.rb
     spec/spec_helper.rb
     spec/support/async-test.rb
-  }
-  s.require_paths = ["lib"]
+  ]
+  s.require_paths = ['lib']
 
-  s.extra_rdoc_files = ["README.textile"]
+  s.extra_rdoc_files = ['README.textile']
 
   # RubyForge
-  s.rubyforge_project = "sockjs"
+  s.rubyforge_project = 'sockjs'
 end

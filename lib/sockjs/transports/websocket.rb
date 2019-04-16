@@ -7,9 +7,9 @@ def activate
 end# encoding: utf-8
 =end
 
-require "forwardable"
-require "sockjs/faye"
-require "sockjs/transport"
+require 'forwardable'
+require 'sockjs/faye'
+require 'sockjs/transport'
 
 # Raw WebSocket url: /websocket
 # -------------------------------
@@ -70,16 +70,16 @@ module SockJS
         elsif request.env["HTTP_UPGRADE"].to_s.downcase != "websocket"
           SockJS.debug("Wrong headers! HTTP_UPGRADE = #{request.env["HTTP_UPGRADE"].to_s}")
           raise HttpError.new(400, 'Can "Upgrade" only to "WebSocket".')
-        elsif not ["Upgrade", "keep-alive, Upgrade"].include?(request.env["HTTP_CONNECTION"])
+        elsif not ["upgrade", "keep-alive, upgrade"].include?(request.env["HTTP_CONNECTION"].to_s.downcase)
           SockJS.debug("Wrong headers! HTTP_CONNECTION = #{request.env["HTTP_CONNECTION"].to_s}")
           raise HttpError.new(400, '"Connection" must be "Upgrade".')
         end
 
-        super
+        super.rack_response
       end
 
       def build_response(request)
-        SockJS.debug "Upgrading to WebSockets ..."
+        SockJS.debug 'Upgrading to WebSockets ...'
 
         web_socket = Faye::WebSocket.new(request.env)
 
@@ -97,10 +97,10 @@ module SockJS
         @session = session
         web_socket.on :open do |event|
           begin
-            SockJS.debug "Attaching consumer"
+            SockJS.debug 'Attaching consumer'
             session.attach_consumer(web_socket, self)
           rescue Object => ex
-            SockJS::debug "Error opening (#{event.inspect[0..40]}) websocket: #{ex.inspect}"
+            SockJS.debug "Error opening (#{event.inspect[0..40]}) websocket: #{ex.inspect}"
           end
         end
 
@@ -115,9 +115,9 @@ module SockJS
 
         web_socket.on :close do |event|
           begin
-            session.close(1000, "Session finished")
+            session.close(1000, 'Session finished')
           rescue Object => ex
-            SockJS::debug "Error closing websocket (#{event.inspect[0..40]}): #{ex.inspect} \n#{ex.message} \n#{ex.backtrace.join("\n")}"
+            SockJS.debug "Error closing websocket (#{event.inspect[0..40]}): #{ex.inspect} \n#{ex.message} \n#{ex.backtrace.join("\n")}"
           end
         end
       end
@@ -132,7 +132,7 @@ module SockJS
       end
 
       def finish_response(web_socket)
-        SockJS.debug "Finishing response"
+        SockJS.debug 'Finishing response'
         web_socket.close
       end
 
@@ -140,6 +140,8 @@ module SockJS
         SockJS.debug "Received message event: #{event.data.inspect}"
         event.data
       end
+
+
 
       def heartbeat_frame(web_socket)
         @pong = true if @pong.nil?
@@ -149,8 +151,8 @@ module SockJS
           @session.suspend if @session
         end
         @pong = false
-        web_socket.ping("ping") do
-          SockJS.debug "pong"
+        web_socket.ping('ping') do
+          SockJS.debug 'pong'
           @pong = true
           @session.activate
         end
@@ -162,7 +164,7 @@ module SockJS
       register 'GET', 'websocket'
 
       def handle_request(request)
-        ver = request.env["sec-websocket-version"] || ""
+        ver = request.env['sec-websocket-version'] || request.env['HTTP_SEC_WEBSOCKET_VERSION'] || ''
         unless ['8', '13'].include?(ver)
           raise HttpError.new(400, 'Only supported WebSocket protocol is RFC 6455.')
         end
@@ -171,7 +173,7 @@ module SockJS
       end
 
       def self.routing_prefix
-        "/" + self.prefix
+        '/' + self.prefix
       end
 
       def opening_frame(response)

@@ -90,6 +90,14 @@ module SockJS
       def set_heartbeat_timer
         _set_heartbeat_timer
       end
+
+      def closed?
+        false
+      end
+
+      def suspended?
+        false
+      end
     end
 
     state :Attached do
@@ -139,6 +147,15 @@ module SockJS
       def set_heartbeat_timer
         _set_heartbeat_timer
       end
+
+
+      def closed?
+        false
+      end
+
+      def suspended?
+        false
+      end
     end
 
     state :Suspended do
@@ -187,6 +204,14 @@ module SockJS
       def set_heartbeat_timer
         _set_heartbeat_timer
       end
+
+      def closed?
+        false
+      end
+
+      def suspended?
+        true
+      end
     end
 
     state :Closed do
@@ -212,6 +237,14 @@ module SockJS
 
       def close(status=nil, message=nil)
         #can be called from faye onclose hook
+      end
+
+      def closed?
+        true
+      end
+
+      def suspended?
+        false
       end
 
       def set_heartbeat_timer

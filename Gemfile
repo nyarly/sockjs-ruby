@@ -11,6 +11,6 @@ gemspec
 group(:test) do
   gem 'uuid'
   gem 'rack-test'
-  gem "rspec"
+  gem "rspec", "< 3.0"
   gem 'fuubar'
 end

@@ -202,7 +202,7 @@ module SockJS
 
   class Transport < SessionEndpoint
     def handle_request(request)
-      SockJS::debug({:Request => request, :Transport => self}.inspect)
+      SockJS.debug({:Request => request, :Transport => self}.inspect)
 
       response = build_response(request)
       session = get_session(response)
