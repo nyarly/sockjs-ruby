@@ -81,14 +81,10 @@ module Rack
           <html>
             <body>
               <h1>Handler Not Found</h1>
-              <ul>
-                <li>Prefix: #{prefix.inspect}</li>
-                <li>Method: #{method.inspect}</li>
-              </ul>
             </body>
           </html>
         HTML
-        ::SockJS.debug "Handler not found!"
+        ::SockJS.debug "Handler not found! #{method} #{prefix}"
         [404, {"Content-Type" => "text/html; charset=UTF-8", "Content-Length" => body.bytesize.to_s}, [body]]
       end
     end
